@@ -268,3 +268,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // (Leaves can stay as-is; no need to change)
 });
+/* ===== Neon Falling Leaves ===== */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  const container = document.createElement("div");
+  container.id = "leafContainer";
+  document.body.prepend(container);
+
+  const leafSVG = `
+  <svg viewBox="0 0 24 24" fill="#00ff88" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2L14 8L20 6L16 11L22 14L15 14L17 20L12 16L7 20L9 14L2 14L8 11L4 6L10 8L12 2Z"/>
+  </svg>
+  `;
+
+  function createLeaf() {
+    const leaf = document.createElement("div");
+    leaf.classList.add("leaf");
+    leaf.innerHTML = leafSVG;
+
+    leaf.style.left = Math.random() * 100 + "vw";
+    leaf.style.animationDuration = (6 + Math.random() * 8) + "s";
+    leaf.style.animationDelay = Math.random() * 5 + "s";
+    leaf.style.transform = `scale(${0.6 + Math.random()})`;
+
+    container.appendChild(leaf);
+
+    setTimeout(() => {
+      leaf.remove();
+    }, 15000);
+  }
+
+  setInterval(createLeaf, 600);
+});

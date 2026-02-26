@@ -24,12 +24,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const copyMsg = document.getElementById("copyMsg");
   const smsLink = document.getElementById("smsLink");
 
-  // Menu UI (these IDs must exist in your HTML)
+  // Menu UI
   const menuGrid = document.getElementById("menuGrid");
   const menuStatus = document.getElementById("menuStatus");
 
-  // Leaf layer (optional, safe if missing)
-  const leafContainer = document.querySelector(".leaf-rain");
+  // Neon leaf layer (this is the REAL one now)
+  const neonLeafContainer = document.getElementById("leafContainer");
 
   let isUnlocked = false;
 
@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   setLockedUI();
 
-  // Video detection (NOW supports .MOV)
+  // Video detection (supports .MOV too)
   function isVideo(path = "") {
     return /\.(mp4|webm|ogg|mov)$/i.test(path);
   }
@@ -266,38 +266,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // (Leaves can stay as-is; no need to change)
-});
-/* ===== Neon Falling Leaves ===== */
+  /* =========================================================
+     NEON POT LEAF RAIN (matches style.css: .neon-leaf + neonFall)
+  ========================================================= */
+  if (neonLeafContainer) {
+    const leafSVG = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+        <path d="M32 4c2 8 3 16 2 24 4-6 10-11 18-14-5 10-10 18-18 24 6-1 13-1 22 2-9 6-17 9-24 8 5 5 9 12 10 22-9-5-15-11-18-18-3 7-9 13-18 18 1-10 5-17 10-22-7 1-15-2-24-8 9-3 16-3 22-2-8-6-13-14-18-24 8 3 14 8 18 14-1-8 0-16 2-24z"
+              fill="rgba(60,255,132,0.95)"/>
+      </svg>
+    `;
 
-document.addEventListener("DOMContentLoaded", function () {
+    function spawnLeaf() {
+      const leaf = document.createElement("div");
+      leaf.className = "neon-leaf";
+      leaf.innerHTML = leafSVG;
 
-  const container = document.createElement("div");
-  container.id = "leafContainer";
-  document.body.prepend(container);
+      const size = 12 + Math.random() * 14; // 12–26px
+      leaf.style.width = size + "px";
+      leaf.style.height = size + "px";
+      leaf.style.left = (Math.random() * 100) + "vw";
 
-  const leafSVG = `
-  <svg viewBox="0 0 24 24" fill="#00ff88" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 2L14 8L20 6L16 11L22 14L15 14L17 20L12 16L7 20L9 14L2 14L8 11L4 6L10 8L12 2Z"/>
-  </svg>
-  `;
+      leaf.style.setProperty("--drift", (Math.random() * 160 - 80).toFixed(0) + "px");
+      leaf.style.setProperty("--rot0", (Math.random() * 360).toFixed(0) + "deg");
+      leaf.style.setProperty("--rot1", (Math.random() * 720 - 360).toFixed(0) + "deg");
 
-  function createLeaf() {
-    const leaf = document.createElement("div");
-    leaf.classList.add("leaf");
-    leaf.innerHTML = leafSVG;
+      leaf.style.animationDuration = (10 + Math.random() * 16) + "s";
+      leaf.style.opacity = (0.10 + Math.random() * 0.18).toFixed(2);
 
-    leaf.style.left = Math.random() * 100 + "vw";
-    leaf.style.animationDuration = (6 + Math.random() * 8) + "s";
-    leaf.style.animationDelay = Math.random() * 5 + "s";
-    leaf.style.transform = `scale(${0.6 + Math.random()})`;
+      neonLeafContainer.appendChild(leaf);
+      setTimeout(() => leaf.remove(), 28000);
+    }
 
-    container.appendChild(leaf);
+    // Spawn a burst immediately so you SEE it
+    for (let i = 0; i < 10; i++) setTimeout(spawnLeaf, i * 180);
 
-    setTimeout(() => {
-      leaf.remove();
-    }, 15000);
+    // Then keep raining
+    setInterval(spawnLeaf, 650);
   }
-
-  setInterval(createLeaf, 600);
 });

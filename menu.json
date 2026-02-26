@@ -1,0 +1,18 @@
+{
+  "items": [
+    {
+      "category": "Flower",
+      "name": "RUNTZ",
+      "price": "3.5g $30 • 7g $55 • 14g $100 • OZ $180",
+      "desc": "Sweet gas. Loud. Clean burn.",
+      "media": "media/runtz.mp4"
+    },
+    {
+      "category": "Concentrates",
+      "name": "Lemon Skunk — Live Resin",
+      "price": "1g $25 • 2g $45 • 3.5g $80 • 7g $150",
+      "desc": "Terpy citrus funk. Heavy effect.",
+      "media": "media/LemonSkunk.mp4"
+    }
+  ]
+}

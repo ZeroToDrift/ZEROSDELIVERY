@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ZEROS™</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css?v=6000" />
+</head>
+
+<body>
+  <div class="site-bg">
+    <!-- Leaf rain layer -->
+    <div class="leaf-rain" aria-hidden="true"></div>
+
+    <main class="container">
+      <!-- Toast -->
+      <div id="toast" class="toast hidden" aria-live="polite"></div>
+
+      <!-- ===== PUBLIC ===== -->
+      <section id="public">
+        <header class="hero">
+          <div class="kicker">PRESSURE SEASON</div>
+
+          <!-- Press & hold reveals Members -->
+          <h1 class="logo no-zoom" id="logoTrigger" role="button" tabindex="0">
+            ZEROS<span class="tm">™</span>
+          </h1>
+
+          <p class="tagline" id="taglineText">Fast. Discreet. Licensed.</p>
+          <p class="pressure" id="pressureLevel">PRESSURE LEVEL: STABLE</p>
+          <p class="cult" id="cultLine"></p>
+        </header>
+
+        <section class="card">
+          <a class="btn primary" href="https://t.me/+PNco3ZIElZBjODBh" target="_blank" rel="noopener">
+            View Full Menu on Telegram
+          </a>
+
+          <div class="helper">For menu + ordering, use Telegram.</div>
+
+          <a class="btn" href="https://instagram.com/zero2drift" target="_blank" rel="noopener">
+            Business / Inquiries → Instagram DM @zero2drift
+          </a>
+
+          <p class="fineprint">
+            By messaging, you confirm you are of legal age in your area.
+          </p>
+        </section>
+
+        <footer class="footer">
+          <span class="dot"></span>
+
+          <a class="footer-strong footer-link"
+             href="https://youtu.be/dQw4w9WgXcQ?si=k6fLU03Dcl_gIcvY"
+             target="_blank"
+             rel="noopener">
+            ZEROS™
+          </a>
+
+          <span class="sep">•</span>
+          <span class="muted">No weird shit. Just quality.</span>
+        </footer>
+      </section>
+
+      <!-- ===== MEMBERS (Hidden until press & hold) ===== -->
+      <section id="members" class="members-wrap hidden">
+        <header class="hero" style="margin-top:22px;">
+          <div class="kicker">MEMBERS ONLY</div>
+          <h2 class="members-title">Private Access</h2>
+          <p class="tagline">Enter the password to unlock the members line + menu.</p>
+        </header>
+
+        <section class="card">
+          <!-- Password Gate -->
+          <div id="gate" class="gate">
+            <label class="label" for="memberPass">Password</label>
+
+            <div class="row">
+              <input
+                id="memberPass"
+                class="input"
+                type="password"
+                placeholder="Enter password"
+                autocomplete="off"
+                autocapitalize="none"
+                autocorrect="off"
+                spellcheck="false"
+              />
+              <button id="unlockBtn" class="btn small primary" type="button">
+                Unlock
+              </button>
+            </div>
+
+            <p id="gateMsg" class="helper"></p>
+          </div>
+
+          <!-- Unlocked Content -->
+          <div id="memberContent" class="hidden">
+            <div class="member-label">Members Line</div>
+            <div id="burnerNumber" class="member-number">••• ••• ••••</div>
+
+            <div class="row" style="margin-top: 14px;">
+              <button id="copyBtn" class="btn primary" type="button" disabled>
+                Copy Number
+              </button>
+
+              <a id="smsLink" class="btn disabled" href="#" aria-disabled="true">
+                Text
+              </a>
+            </div>
+
+            <p id="copyMsg" class="helper"></p>
+
+            <hr class="hr" />
+
+            <div class="member-label">Members Menu</div>
+            <div id="menuStatus" class="helper" style="margin-top:8px;"></div>
+            <div id="menuGrid" class="menu-grid"></div>
+          </div>
+        </section>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="script.js?v=6000"></script>
+</body>
+</html>

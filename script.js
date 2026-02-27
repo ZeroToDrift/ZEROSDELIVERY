@@ -1,351 +1,483 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const MEMBER_PASSWORD = "BigJigglyBalls";
-  const MEMBERS_NUMBER = "(646) 444-4277";
-  const MENU_JSON_PATH = "menu.json";
+:root{
+  --neon:#3cff84;
+  --neonStrong:#2bff76;
+  --after:#ff3c6f;
 
-  // Public / vibe
-  const logoTrigger = document.getElementById("logoTrigger");
-  const membersSection = document.getElementById("members");
-  const toast = document.getElementById("toast");
-  const pressureEl = document.getElementById("pressureLevel");
-  const cultEl = document.getElementById("cultLine");
-  const taglineEl = document.getElementById("taglineText");
+  --glass: rgba(6,8,10,0.70);
+  --glass2: rgba(0,0,0,0.22);
+  --line: rgba(255,255,255,0.12);
+  --muted: rgba(255,255,255,0.70);
+}
 
-  // Gate + members content
-  const gate = document.getElementById("gate");
-  const memberContent = document.getElementById("memberContent");
-  const passInput = document.getElementById("memberPass");
-  const unlockBtn = document.getElementById("unlockBtn");
-  const gateMsg = document.getElementById("gateMsg");
+*{ box-sizing:border-box; }
+html, body{ height:100%; }
 
-  // Number + actions
-  const numberEl = document.getElementById("burnerNumber");
-  const copyBtn = document.getElementById("copyBtn");
-  const copyMsg = document.getElementById("copyMsg");
-  const smsLink = document.getElementById("smsLink");
+body{
+  margin:0;
+  font-family:"Space Grotesk", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:#fff;
+  background:#050607;
+  overflow-x:hidden;
+}
 
-  // Menu UI
-  const menuGrid = document.getElementById("menuGrid");
-  const menuStatus = document.getElementById("menuStatus");
+/* ===== Background ===== */
+.site-bg{
+  min-height:100vh;
+  background-image:
+    linear-gradient(180deg, rgba(0,0,0,0.78), rgba(0,0,0,0.68)),
+    radial-gradient(circle at 50% 30%, rgba(60,255,132,0.35), transparent 60%),
+    radial-gradient(circle at 50% 70%, rgba(176,107,255,0.18), transparent 70%),
+    url("1919B37D-65D2-4E03-9227-57B6B96BCD69.png");
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-attachment:fixed;
 
-  // Neon leaf layer
-  const neonLeafContainer = document.getElementById("leafContainer");
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
 
-  let isUnlocked = false;
+  padding:56px 16px;
+  text-align:center;
 
-  function showToast(msg) {
-    if (!toast) return;
-    toast.textContent = msg;
-    toast.classList.remove("hidden");
-    setTimeout(() => toast.classList.add("hidden"), 1200);
-  }
+  position:relative;
+  filter:brightness(1.15) saturate(1.2);
+}
 
-  function setPressure(state) {
-    if (!pressureEl) return;
-    pressureEl.textContent = `PRESSURE LEVEL: ${state}`;
-  }
+/* ===== Content wrapper ===== */
+.container{
+  position:relative;
+  z-index:2; /* ALWAYS above leaves */
+  width:100%;
+  max-width:540px;
+}
 
-  showToast("JS ONLINE");
+/* ===== Toast ===== */
+.toast{
+  position:fixed;
+  top:18px;
+  left:50%;
+  transform:translateX(-50%);
+  padding:10px 14px;
+  border-radius:999px;
+  background:rgba(0,0,0,0.60);
+  border:1px solid rgba(60,255,132,0.40);
+  z-index:1000;
+  font-size:13px;
+  font-weight:700;
+}
+.hidden{ display:none !important; }
 
-  // After Dark mode (10PM–5AM)
-  const hour = new Date().getHours();
-  const afterDark = (hour >= 22 || hour < 5);
-  if (afterDark) {
-    document.body.classList.add("after-dark");
-    if (taglineEl) taglineEl.textContent = "After Hours Protocol Active.";
-  }
+/* ===== Hero ===== */
+.hero{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
 
-  // Cult phrases
-  const cultPhrases = afterDark
-    ? ["We see you.", "Keep your voice low.", "Not everyone gets in.", "You weren’t supposed to find this."]
-    : ["Members move in silence.", "Stay discreet.", "Access is earned.", "Say less."];
+.kicker{
+  display:inline-flex;
+  padding:8px 18px;
+  border-radius:999px;
+  border:1px solid rgba(60,255,132,0.45);
+  background: rgba(0,0,0,0.35);
+  margin-bottom:16px;
+  font-size:12px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+}
 
-  function rotateCult() {
-    if (!cultEl) return;
-    cultEl.textContent = cultPhrases[Math.floor(Math.random() * cultPhrases.length)];
-  }
-  rotateCult();
-  setInterval(rotateCult, 9000);
+.logo{
+  margin:0;
+  font-size:52px;
+  font-weight:900;
+  letter-spacing:8px;
+  cursor:pointer;
+  text-shadow:
+    0 0 10px var(--neonStrong),
+    0 0 25px var(--neon),
+    0 0 55px rgba(60,255,132,0.45);
+  -webkit-tap-highlight-color: transparent;
+}
 
-  // Hold logo to reveal members
-  let holdTimer = null;
-  let holding = false;
+.no-zoom{
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-touch-callout:none;
+  touch-action:manipulation;
+}
 
-  function revealMembers() {
-    if (!membersSection) return;
-    membersSection.classList.remove("hidden");
-    showToast("Members unlocked.");
-    setPressure("ELEVATED");
-    setTimeout(() => membersSection.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
-    setTimeout(() => passInput?.focus(), 400);
-  }
+.tm{
+  font-size:16px;
+  vertical-align:super;
+  margin-left:4px;
+}
 
-  function startHold(e) {
-    e.preventDefault();
-    if (holding) return;
-    holding = true;
-    holdTimer = setTimeout(revealMembers, 1200);
-  }
+.tagline{
+  margin-top:12px;
+  font-size:18px;
+  opacity:0.85;
+}
 
-  function endHold() {
-    holding = false;
-    clearTimeout(holdTimer);
-  }
+.pressure{
+  margin-top:10px;
+  font-size:13px;
+  letter-spacing:2px;
+  opacity:0.85;
+}
 
-  if (logoTrigger) {
-    logoTrigger.addEventListener("touchstart", startHold, { passive: false });
-    logoTrigger.addEventListener("touchend", endHold);
-    logoTrigger.addEventListener("touchcancel", endHold);
-    logoTrigger.addEventListener("mousedown", startHold);
-    logoTrigger.addEventListener("mouseup", endHold);
-    logoTrigger.addEventListener("mouseleave", endHold);
-  }
+.cult{
+  margin-top:6px;
+  font-size:12px;
+  opacity:0.65;
+}
 
-  // Locked state
-  function setLockedUI() {
-    isUnlocked = false;
+/* ===== Card ===== */
+.card{
+  padding:24px;
+  border-radius:20px;
+  margin-top:20px;
+  background:var(--glass);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border:1px solid rgba(60,255,132,0.28);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.65);
+}
 
-    if (numberEl) numberEl.textContent = "••• ••• ••••";
-    if (copyBtn) copyBtn.disabled = true;
+.helper{
+  margin:10px 0 0;
+  font-size:14px;
+  opacity:0.75;
+}
 
-    if (smsLink) {
-      smsLink.classList.add("disabled");
-      smsLink.setAttribute("aria-disabled", "true");
-      smsLink.href = "#";
-    }
+.fineprint{
+  margin:16px 0 0;
+  font-size:12px;
+  opacity:0.55;
+  line-height:1.35;
+}
 
-    if (copyMsg) copyMsg.textContent = "";
-    if (menuGrid) menuGrid.innerHTML = "";
-    if (menuStatus) menuStatus.textContent = "";
-  }
+.hr{
+  border:none;
+  height:1px;
+  background: rgba(255,255,255,0.10);
+  margin:18px 0;
+}
 
-  function setUnlockedUI() {
-    isUnlocked = true;
+/* ===== Buttons ===== */
+.btn{
+  display:block;
+  width:100%;
+  padding:16px;
+  border-radius:18px;
+  margin:14px 0;
+  text-decoration:none;
+  font-weight:800;
+  font-size:17px;
+  color:white;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.18);
+  transition: transform .15s ease, filter .15s ease;
+}
 
-    gate?.classList.add("hidden");
-    memberContent?.classList.remove("hidden");
+.btn:hover{
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
 
-    if (numberEl) numberEl.textContent = MEMBERS_NUMBER;
-    if (copyBtn) copyBtn.disabled = false;
+.btn.primary{
+  background: linear-gradient(90deg, #1fd86f, #3cff84);
+  border:1px solid rgba(60,255,132,0.60);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.35);
+}
 
-    if (smsLink) {
-      smsLink.classList.remove("disabled");
-      smsLink.removeAttribute("aria-disabled");
-      smsLink.href = `sms:${encodeURIComponent(MEMBERS_NUMBER)}`;
-    }
+.btn.small{
+  width:auto;
+  margin:0;
+  padding:14px 16px;
+  white-space:nowrap;
+}
 
-    showToast("Access granted.");
-    setPressure("CLEARED");
+.disabled{
+  pointer-events:none;
+  opacity:0.55;
+}
 
-    loadMenu();
-  }
+/* ===== Footer ===== */
+.footer{
+  margin-top:22px;
+  padding-bottom:16px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+  font-size:13px;
+  opacity:0.8;
+}
 
-  setLockedUI();
+.dot{
+  width:9px; height:9px;
+  border-radius:50%;
+  background:var(--neonStrong);
+  box-shadow:0 0 15px var(--neonStrong);
+}
 
-  function isVideo(path = "") {
-    return /\.(mp4|webm|ogg|mov)$/i.test(path);
-  }
+.footer-link{
+  text-decoration:none;
+  color:rgba(255,255,255,0.92);
+  font-weight:800;
+}
 
-  function escapeHtml(s = "") {
-    return String(s).replace(/[&<>"']/g, (c) => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
-    }[c]));
-  }
+.footer-link:hover{
+  text-shadow: 0 0 10px rgba(60,255,132,0.55), 0 0 25px rgba(60,255,132,0.35);
+}
 
-  // ---------- CATEGORY GROUPING HELPERS ----------
-  function normalizeCategory(cat = "") {
-    const c = String(cat || "").trim();
-    return c || "Other";
-  }
+/* ===== Members ===== */
+.members-wrap{ margin-top:26px; }
 
-  function categoryTitle(cat) {
-    return normalizeCategory(cat).toUpperCase();
-  }
+.members-title{
+  margin:0;
+  font-size:28px;
+  font-weight:900;
+}
 
-  function groupByCategory(items) {
-    const map = new Map();
-    for (const it of items) {
-      const cat = normalizeCategory(it.category);
-      if (!map.has(cat)) map.set(cat, []);
-      map.get(cat).push(it);
-    }
-    return map;
-  }
+.row{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
 
-  function renderCategoryHeader(cat) {
-    const header = document.createElement("div");
-    header.className = "menu-section";
-    header.innerHTML = `
-      <div class="menu-section-title">${escapeHtml(categoryTitle(cat))}</div>
-      <div class="menu-section-line"></div>
-    `;
-    return header;
-  }
+.label{
+  display:block;
+  margin-bottom:10px;
+  font-weight:900;
+  opacity:0.9;
+  text-align:left;
+}
 
-  async function loadMenu() {
-    if (!menuGrid || !menuStatus) return;
+.input{
+  flex:1;
+  width:100%;
+  padding:14px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.18);
+  background:rgba(255,255,255,0.08);
+  color:white;
+  font-size:16px;
+  outline:none;
+}
 
-    menuStatus.textContent = "Loading menu…";
-    menuGrid.innerHTML = "";
+.input:focus{
+  border-color: rgba(60,255,132,0.55);
+  box-shadow: 0 0 0 3px rgba(60,255,132,0.10);
+}
 
-    try {
-      const res = await fetch(MENU_JSON_PATH, { cache: "no-store" });
-      if (!res.ok) throw new Error("menu.json not found");
-      const data = await res.json();
+.member-label{
+  font-weight:900;
+  margin-top:6px;
+}
 
-      if (!Array.isArray(data.items)) throw new Error("menu.json format invalid");
+.member-number{
+  font-size:22px;
+  font-weight:900;
+  padding:14px;
+  border-radius:14px;
+  border:1px solid rgba(60,255,132,0.30);
+  margin-top:10px;
+  background:rgba(0,0,0,0.18);
+}
 
-      if (data.items.length === 0) {
-        menuStatus.textContent = "Menu is empty. Add items to menu.json.";
-        return;
-      }
+/* ===== Members Menu styling ===== */
+.menu-grid{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:14px;
+}
 
-      menuStatus.textContent = "";
+.menu-item{
+  text-align:left;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:14px;
+  background:var(--glass2);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.40);
+}
 
-      // Group items
-      const grouped = groupByCategory(data.items);
+.menu-top{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+}
 
-      // Render in insertion order (the order categories appear in JSON)
-      for (const [cat, items] of grouped.entries()) {
-        menuGrid.appendChild(renderCategoryHeader(cat));
+.menu-name{
+  font-weight:1000;
+  font-size:16px;
+  letter-spacing:0.4px;
+}
 
-        for (const item of items) {
-          const name = escapeHtml(item.name || "");
-          const price = escapeHtml(item.price || "");
-          const desc = escapeHtml(item.desc || item.description || "");
-          const media = (item.media || "").trim();
+.menu-cat{
+  margin-top:6px;
+  display:inline-flex;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:11px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color: rgba(255,255,255,0.85);
+  border:1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.25);
+}
 
-          const card = document.createElement("div");
-          card.className = "menu-item";
+.menu-price{
+  font-weight:1000;
+  font-size:14px;
+  text-align:right;
+  color: rgba(255,255,255,0.95);
+  max-width: 48%;
+  line-height:1.25;
+}
 
-          let mediaHtml = "";
-          if (media) {
-            if (isVideo(media)) {
-              mediaHtml = `
-                <div class="menu-media">
-                  <video controls playsinline preload="metadata" src="${escapeHtml(media)}"></video>
-                </div>`;
-            } else {
-              mediaHtml = `
-                <div class="menu-media">
-                  <img loading="lazy" src="${escapeHtml(media)}" alt="${name}">
-                </div>`;
-            }
-          }
+.menu-desc{
+  margin-top:10px;
+  color: rgba(255,255,255,0.78);
+  font-size:13px;
+  line-height:1.4;
+}
 
-          card.innerHTML = `
-            <div class="menu-top">
-              <div>
-                <div class="menu-name">${name}</div>
-                <div class="menu-cat">${escapeHtml(cat)}</div>
-              </div>
-              <div class="menu-price">${price}</div>
-            </div>
-            ${desc ? `<div class="menu-desc">${desc}</div>` : ""}
-            ${mediaHtml}
-          `;
+.menu-media{
+  margin-top:12px;
+  border-radius:16px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.25);
+}
 
-          menuGrid.appendChild(card);
-        }
-      }
-    } catch (e) {
-      menuStatus.textContent = "Menu failed to load. Check menu.json format + commit.";
-    }
-  }
+.menu-media img,
+.menu-media video{
+  width:100%;
+  height:auto;
+  display:block;
+}
 
-  // Unlock attempt
-  function unlockAttempt() {
-    const attempt = (passInput?.value || "").normalize("NFKC").trim();
+.menu-media video{
+  max-height: 380px;
+  object-fit: cover;
+}
 
-    if (!attempt) {
-      if (gateMsg) gateMsg.textContent = "Enter the password.";
-      return;
-    }
+/* ===== After Dark ===== */
+.after-dark .site-bg{
+  filter:brightness(0.75) saturate(1.15) contrast(1.05);
+}
 
-    if (attempt === MEMBER_PASSWORD) {
-      if (gateMsg) gateMsg.textContent = "";
-      setUnlockedUI();
-      return;
-    }
+.after-dark .kicker{
+  border-color: rgba(255,60,111,0.40);
+}
 
-    if (gateMsg) gateMsg.textContent = "WRONG PASSWORD.";
-    if (passInput) {
-      passInput.value = "";
-      passInput.focus();
-    }
-  }
+.after-dark .logo{
+  text-shadow:
+    0 0 10px var(--after),
+    0 0 25px var(--after),
+    0 0 55px rgba(255,60,111,0.35);
+}
 
-  unlockBtn?.addEventListener("click", unlockAttempt);
-  passInput?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") unlockAttempt();
-  });
+.after-dark .pressure{ color: rgba(255,60,111,0.92); }
 
-  // Copy guarded
-  copyBtn?.addEventListener("click", async () => {
-    if (!isUnlocked) return;
-    try {
-      await navigator.clipboard.writeText(MEMBERS_NUMBER);
-      if (copyMsg) copyMsg.textContent = "Copied.";
-      setTimeout(() => { if (copyMsg) copyMsg.textContent = ""; }, 1200);
-    } catch {
-      const ta = document.createElement("textarea");
-      ta.value = MEMBERS_NUMBER;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      document.body.removeChild(ta);
-      if (copyMsg) copyMsg.textContent = "Copied.";
-      setTimeout(() => { if (copyMsg) copyMsg.textContent = ""; }, 1200);
-    }
-  });
+.after-dark .card{
+  border-color: rgba(255,60,111,0.18);
+}
 
-  /* =========================================================
-     NEON POT LEAF RAIN (matches style.css: .neon-leaf + neonFall)
-  ========================================================= */
-  if (neonLeafContainer) {
-    const leafSVG = `
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-    <path fill="rgba(60,255,132,0.92)"
-      d="M63 10c3 20 4 33 2 48 9-16 24-29 44-36-11 25-23 40-40 54
-         18-3 34-1 52 7-20 14-38 19-54 18 12 11 21 27 23 52
-         -22-12-36-28-44-45-8 17-22 33-44 45
-         2-25 11-41 23-52-16 1-34-4-54-18
-         18-8 34-10 52-7-17-14-29-29-40-54
-         20 7 35 20 44 36-2-15-1-28 2-48z"/>
-         
-    <path fill="rgba(0,0,0,0.18)"
-      d="M64 20c2 14 2 28 0 42 10-12 22-20 36-25
-         -9 15-18 27-31 36 13-2 26-1 39 5
-         -15 9-28 13-40 12 10 9 17 21 18 39
-         -16-9-26-20-32-33-6 13-16 24-32 33
-         1-18 8-30 18-39-12 1-25-3-40-12
-         13-6 26-7 39-5-13-9-22-21-31-36
-         14 5 26 13 36 25-2-14-2-28 0-42z"/>
-  </svg>
-`;
+.after-dark .btn.primary{
+  background: linear-gradient(90deg, rgba(255,60,111,0.92), rgba(60,255,132,0.90));
+  border-color: rgba(255,60,111,0.35);
+}
 
-    function spawnLeaf() {
-      const leaf = document.createElement("div");
-      leaf.className = "neon-leaf";
-      leaf.innerHTML = leafSVG;
+/* iOS fixed bg helper */
+@supports (-webkit-touch-callout: none){
+  .site-bg{ background-attachment: scroll; }
+}
 
-      const size = 12 + Math.random() * 14; // 12–26px
-      leaf.style.width = size + "px";
-      leaf.style.height = size + "px";
-      leaf.style.left = (Math.random() * 100) + "vw";
+/* ===== Mobile tweaks ===== */
+@media (max-width: 380px){
+  .logo{ font-size:44px; letter-spacing:6px; }
+  .tagline{ font-size:16px; }
+  .btn{ font-size:16px; padding:15px 12px; }
+  .menu-price{ max-width: 55%; }
+}
 
-      leaf.style.setProperty("--drift", (Math.random() * 160 - 80).toFixed(0) + "px");
-      leaf.style.setProperty("--rot0", (Math.random() * 360).toFixed(0) + "deg");
-      leaf.style.setProperty("--rot1", (Math.random() * 720 - 360).toFixed(0) + "deg");
+/* ===== Category headers ===== */
+.menu-section{
+  margin-top: 18px;
+}
 
-      leaf.style.animationDuration = (10 + Math.random() * 16) + "s";
-      leaf.style.opacity = (0.10 + Math.random() * 0.18).toFixed(2);
+.menu-section-title{
+  font-weight: 1000;
+  letter-spacing: 3px;
+  font-size: 12px;
+  opacity: 0.9;
+}
 
-      neonLeafContainer.appendChild(leaf);
-      setTimeout(() => leaf.remove(), 28000);
-    }
+.menu-section-line{
+  height: 1px;
+  margin-top: 10px;
+  background: linear-gradient(90deg, rgba(60,255,132,0.65), rgba(255,255,255,0.06));
+  border-radius: 999px;
+}
 
-    for (let i = 0; i < 10; i++) setTimeout(spawnLeaf, i * 180);
-    setInterval(spawnLeaf, 650);
-  }
-});
+/* =========================================================
+   NEON POT LEAF RAIN (SINGLE ACTIVE SYSTEM)
+   - uses #leafContainer + .neon-leaf
+   - float/sway animation for realism
+========================================================= */
+
+#leafContainer{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1; /* above bg, below content */
+}
+
+.neon-leaf{
+  position:absolute;
+  top:-12vh;
+
+  width:18px;
+  height:18px;
+
+  opacity:0.12;
+  will-change: transform, filter, opacity;
+  transform-origin: center;
+
+  animation: neonFall linear infinite;
+
+  filter:
+    drop-shadow(0 0 4px rgba(60,255,132,0.35))
+    drop-shadow(0 0 10px rgba(60,255,132,0.18));
+}
+
+/* sway/float fall */
+@keyframes neonFall{
+  0%   { transform: translate3d(0,-12vh,0) rotate(var(--rot0, 0deg)); }
+  50%  { transform: translate3d(calc(var(--drift, 0px) * 0.55),50vh,0) rotate(calc(var(--rot1, 360deg) * 0.55)); }
+  100% { transform: translate3d(var(--drift, 0px),110vh,0) rotate(var(--rot1, 360deg)); }
+}
+
+.neon-leaf svg{
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+/* After Dark leaf tint */
+.after-dark .neon-leaf{
+  opacity:0.10;
+  filter:
+    drop-shadow(0 0 5px rgba(255,60,111,0.28))
+    drop-shadow(0 0 12px rgba(255,60,111,0.16));
+}
+
+.after-dark .neon-leaf path{
+  fill: rgba(255,60,111,0.92);
+}

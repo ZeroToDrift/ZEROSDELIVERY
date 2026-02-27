@@ -1,9 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
+
   const MEMBER_PASSWORD = "BigJigglyBalls";
   const MEMBERS_NUMBER = "(646) 444-4277";
   const MENU_JSON_PATH = "menu.json";
 
-  // Public / vibe
   const logoTrigger = document.getElementById("logoTrigger");
   const membersSection = document.getElementById("members");
   const toast = document.getElementById("toast");
@@ -11,24 +11,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const cultEl = document.getElementById("cultLine");
   const taglineEl = document.getElementById("taglineText");
 
-  // Gate + members content
   const gate = document.getElementById("gate");
   const memberContent = document.getElementById("memberContent");
   const passInput = document.getElementById("memberPass");
   const unlockBtn = document.getElementById("unlockBtn");
   const gateMsg = document.getElementById("gateMsg");
 
-  // Number + actions
   const numberEl = document.getElementById("burnerNumber");
   const copyBtn = document.getElementById("copyBtn");
   const copyMsg = document.getElementById("copyMsg");
   const smsLink = document.getElementById("smsLink");
 
-  // Menu UI
   const menuGrid = document.getElementById("menuGrid");
   const menuStatus = document.getElementById("menuStatus");
 
-  // Neon leaf layer
   const neonLeafContainer = document.getElementById("leafContainer");
 
   let isUnlocked = false;
@@ -47,27 +43,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
   showToast("JS ONLINE");
 
-  // After Dark mode (10PM–5AM)
   const hour = new Date().getHours();
   const afterDark = (hour >= 22 || hour < 5);
+
   if (afterDark) {
     document.body.classList.add("after-dark");
     if (taglineEl) taglineEl.textContent = "After Hours Protocol Active.";
   }
 
-  // Cult phrases
   const cultPhrases = afterDark
-    ? ["We see you.", "Keep your voice low.", "Not everyone gets in.", "You weren’t supposed to find this."]
-    : ["Members move in silence.", "Stay discreet.", "Access is earned.", "Say less."];
+    ? ["We see you.", "Keep your voice low.", "Not everyone gets in."]
+    : ["Members move in silence.", "Stay discreet.", "Access is earned."];
 
   function rotateCult() {
     if (!cultEl) return;
-    cultEl.textContent = cultPhrases[Math.floor(Math.random() * cultPhrases.length)];
+    cultEl.textContent =
+      cultPhrases[Math.floor(Math.random() * cultPhrases.length)];
   }
+
   rotateCult();
   setInterval(rotateCult, 9000);
 
-  // Hold logo to reveal members
+  // Hold logo
   let holdTimer = null;
   let holding = false;
 
@@ -76,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
     membersSection.classList.remove("hidden");
     showToast("Members unlocked.");
     setPressure("ELEVATED");
-    setTimeout(() => membersSection.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+    setTimeout(() => membersSection.scrollIntoView({ behavior: "smooth" }), 150);
     setTimeout(() => passInput?.focus(), 400);
   }
 
@@ -95,230 +92,81 @@ document.addEventListener("DOMContentLoaded", () => {
   if (logoTrigger) {
     logoTrigger.addEventListener("touchstart", startHold, { passive: false });
     logoTrigger.addEventListener("touchend", endHold);
-    logoTrigger.addEventListener("touchcancel", endHold);
     logoTrigger.addEventListener("mousedown", startHold);
     logoTrigger.addEventListener("mouseup", endHold);
     logoTrigger.addEventListener("mouseleave", endHold);
   }
 
-  // Locked state
   function setLockedUI() {
     isUnlocked = false;
-
-    if (numberEl) numberEl.textContent = "••• ••• ••••";
-    if (copyBtn) copyBtn.disabled = true;
-
-    if (smsLink) {
-      smsLink.classList.add("disabled");
-      smsLink.setAttribute("aria-disabled", "true");
-      smsLink.href = "#";
-    }
-
-    if (copyMsg) copyMsg.textContent = "";
-    if (menuGrid) menuGrid.innerHTML = "";
-    if (menuStatus) menuStatus.textContent = "";
+    numberEl.textContent = "••• ••• ••••";
+    copyBtn.disabled = true;
+    smsLink.classList.add("disabled");
+    smsLink.href = "#";
+    copyMsg.textContent = "";
+    menuGrid.innerHTML = "";
+    menuStatus.textContent = "";
   }
 
   function setUnlockedUI() {
     isUnlocked = true;
-
-    gate?.classList.add("hidden");
-    memberContent?.classList.remove("hidden");
-
-    if (numberEl) numberEl.textContent = MEMBERS_NUMBER;
-    if (copyBtn) copyBtn.disabled = false;
-
-    if (smsLink) {
-      smsLink.classList.remove("disabled");
-      smsLink.removeAttribute("aria-disabled");
-      smsLink.href = `sms:${encodeURIComponent(MEMBERS_NUMBER)}`;
-    }
-
+    gate.classList.add("hidden");
+    memberContent.classList.remove("hidden");
+    numberEl.textContent = MEMBERS_NUMBER;
+    copyBtn.disabled = false;
+    smsLink.classList.remove("disabled");
+    smsLink.href = `sms:${encodeURIComponent(MEMBERS_NUMBER)}`;
     showToast("Access granted.");
     setPressure("CLEARED");
-
     loadMenu();
   }
 
   setLockedUI();
 
-  function isVideo(path = "") {
-    return /\.(mp4|webm|ogg|mov)$/i.test(path);
-  }
-
-  function escapeHtml(s = "") {
-    return String(s).replace(/[&<>"']/g, (c) => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
-    }[c]));
-  }
-
-  // ---------- CATEGORY GROUPING HELPERS ----------
-  function normalizeCategory(cat = "") {
-    const c = String(cat || "").trim();
-    return c || "Other";
-  }
-
-  function categoryTitle(cat) {
-    return normalizeCategory(cat).toUpperCase();
-  }
-
-  function groupByCategory(items) {
-    const map = new Map();
-    for (const it of items) {
-      const cat = normalizeCategory(it.category);
-      if (!map.has(cat)) map.set(cat, []);
-      map.get(cat).push(it);
-    }
-    return map;
-  }
-
-  function renderCategoryHeader(cat) {
-    const header = document.createElement("div");
-    header.className = "menu-section";
-    header.innerHTML = `
-      <div class="menu-section-title">${escapeHtml(categoryTitle(cat))}</div>
-      <div class="menu-section-line"></div>
-    `;
-    return header;
-  }
-
-  async function loadMenu() {
-    if (!menuGrid || !menuStatus) return;
-
-    menuStatus.textContent = "Loading menu…";
-    menuGrid.innerHTML = "";
-
-    try {
-      const res = await fetch(MENU_JSON_PATH, { cache: "no-store" });
-      if (!res.ok) throw new Error("menu.json not found");
-      const data = await res.json();
-
-      if (!Array.isArray(data.items)) throw new Error("menu.json format invalid");
-
-      if (data.items.length === 0) {
-        menuStatus.textContent = "Menu is empty. Add items to menu.json.";
-        return;
-      }
-
-      menuStatus.textContent = "";
-
-      const grouped = groupByCategory(data.items);
-
-      for (const [cat, items] of grouped.entries()) {
-        menuGrid.appendChild(renderCategoryHeader(cat));
-
-        for (const item of items) {
-          const name = escapeHtml(item.name || "");
-          const price = escapeHtml(item.price || "");
-          const desc = escapeHtml(item.desc || item.description || "");
-          const media = (item.media || "").trim();
-
-          const card = document.createElement("div");
-          card.className = "menu-item";
-
-          let mediaHtml = "";
-          if (media) {
-            if (isVideo(media)) {
-              mediaHtml = `
-                <div class="menu-media">
-                  <video controls playsinline preload="metadata" src="${escapeHtml(media)}"></video>
-                </div>`;
-            } else {
-              mediaHtml = `
-                <div class="menu-media">
-                  <img loading="lazy" src="${escapeHtml(media)}" alt="${name}">
-                </div>`;
-            }
-          }
-
-          card.innerHTML = `
-            <div class="menu-top">
-              <div>
-                <div class="menu-name">${name}</div>
-                <div class="menu-cat">${escapeHtml(cat)}</div>
-              </div>
-              <div class="menu-price">${price}</div>
-            </div>
-            ${desc ? `<div class="menu-desc">${desc}</div>` : ""}
-            ${mediaHtml}
-          `;
-
-          menuGrid.appendChild(card);
-        }
-      }
-    } catch (e) {
-      menuStatus.textContent = "Menu failed to load. Check menu.json format + commit.";
-    }
-  }
-
-  // Unlock attempt
-  function unlockAttempt() {
-    const attempt = (passInput?.value || "").normalize("NFKC").trim();
-
-    if (!attempt) {
-      if (gateMsg) gateMsg.textContent = "Enter the password.";
-      return;
-    }
-
+  unlockBtn?.addEventListener("click", () => {
+    const attempt = passInput.value.trim();
     if (attempt === MEMBER_PASSWORD) {
-      if (gateMsg) gateMsg.textContent = "";
+      gateMsg.textContent = "";
       setUnlockedUI();
-      return;
-    }
-
-    if (gateMsg) gateMsg.textContent = "WRONG PASSWORD.";
-    if (passInput) {
+    } else {
+      gateMsg.textContent = "WRONG PASSWORD.";
       passInput.value = "";
       passInput.focus();
     }
-  }
-
-  unlockBtn?.addEventListener("click", unlockAttempt);
-  passInput?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") unlockAttempt();
   });
 
-  // Copy guarded
   copyBtn?.addEventListener("click", async () => {
     if (!isUnlocked) return;
-    try {
-      await navigator.clipboard.writeText(MEMBERS_NUMBER);
-      if (copyMsg) copyMsg.textContent = "Copied.";
-      setTimeout(() => { if (copyMsg) copyMsg.textContent = ""; }, 1200);
-    } catch {
-      const ta = document.createElement("textarea");
-      ta.value = MEMBERS_NUMBER;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      document.body.removeChild(ta);
-      if (copyMsg) copyMsg.textContent = "Copied.";
-      setTimeout(() => { if (copyMsg) copyMsg.textContent = ""; }, 1200);
-    }
+    await navigator.clipboard.writeText(MEMBERS_NUMBER);
+    copyMsg.textContent = "Copied.";
+    setTimeout(() => copyMsg.textContent = "", 1200);
   });
 
   /* =========================================================
-     NEON POT LEAF RAIN
-     FIXED: no cut-offs + glow won’t clip
+     FIXED NEON LEAF SYSTEM (NO CLIPPING)
   ========================================================= */
+
   if (neonLeafContainer) {
+
     const leafSVG = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 -20 168 168">
-  <path fill="rgba(60,255,132,0.92)"
-    d="M63 10c3 20 4 33 2 48 9-16 24-29 44-36-11 25-23 40-40 54
-       18-3 34-1 52 7-20 14-38 19-54 18 12 11 21 27 23 52
-       -22-12-36-28-44-45-8 17-22 33-44 45
-       2-25 11-41 23-52-16 1-34-4-54-18
-       18-8 34-10 52-7-17-14-29-29-40-54
-       20 7 35 20 44 36-2-15-1-28 2-48z"/>
-  <path fill="rgba(0,0,0,0.18)"
-    d="M64 20c2 14 2 28 0 42 10-12 22-20 36-25
-       -9 15-18 27-31 36 13-2 26-1 39 5
-       -15 9-28 13-40 12 10 9 17 21 18 39
-       -16-9-26-20-32-33-6 13-16 24-32 33
-       1-18 8-30 18-39-12 1-25-3-40-12
-       13-6 26-7 39-5-13-9-22-21-31-36
-       14 5 26 13 36 25-2-14-2-28 0-42z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-40 -40 208 208">
+  <g transform="translate(64 64) scale(0.86) translate(-64 -64)">
+    <path fill="rgba(60,255,132,0.92)"
+      d="M63 10c3 20 4 33 2 48 9-16 24-29 44-36-11 25-23 40-40 54
+         18-3 34-1 52 7-20 14-38 19-54 18 12 11 21 27 23 52
+         -22-12-36-28-44-45-8 17-22 33-44 45
+         2-25 11-41 23-52-16 1-34-4-54-18
+         18-8 34-10 52-7-17-14-29-29-40-54
+         20 7 35 20 44 36-2-15-1-28 2-48z"/>
+    <path fill="rgba(0,0,0,0.18)"
+      d="M64 20c2 14 2 28 0 42 10-12 22-20 36-25
+         -9 15-18 27-31 36 13-2 26-1 39 5
+         -15 9-28 13-40 12 10 9 17 21 18 39
+         -16-9-26-20-32-33-6 13-16 24-32 33
+         1-18 8-30 18-39-12 1-25-3-40-12
+         13-6 26-7 39-5-13-9-22-21-31-36
+         14 5 26 13 36 25-2-14-2-28 0-42z"/>
+  </g>
 </svg>
 `;
 
@@ -327,25 +175,26 @@ document.addEventListener("DOMContentLoaded", () => {
       leaf.className = "neon-leaf";
       leaf.innerHTML = leafSVG;
 
-      const size = 12 + Math.random() * 14; // 12–26px
+      const size = 10 + Math.random() * 12; // smaller overall
       leaf.style.width = size + "px";
       leaf.style.height = size + "px";
 
-      // FIX: don’t spawn right on edges
+      // Safe spawn zone
       leaf.style.left = (Math.random() * 90 + 5) + "vw";
 
-      leaf.style.setProperty("--drift", (Math.random() * 160 - 80).toFixed(0) + "px");
-      leaf.style.setProperty("--rot0", (Math.random() * 360).toFixed(0) + "deg");
-      leaf.style.setProperty("--rot1", (Math.random() * 720 - 360).toFixed(0) + "deg");
+      leaf.style.setProperty("--drift", (Math.random() * 140 - 70) + "px");
+      leaf.style.setProperty("--rot0", Math.random() * 360 + "deg");
+      leaf.style.setProperty("--rot1", (Math.random() * 720 - 360) + "deg");
 
-      leaf.style.animationDuration = (10 + Math.random() * 16) + "s";
-      leaf.style.opacity = (0.10 + Math.random() * 0.18).toFixed(2);
+      leaf.style.animationDuration = (12 + Math.random() * 14) + "s";
+      leaf.style.opacity = (0.08 + Math.random() * 0.15).toFixed(2);
 
       neonLeafContainer.appendChild(leaf);
-      setTimeout(() => leaf.remove(), 28000);
+      setTimeout(() => leaf.remove(), 30000);
     }
 
-    for (let i = 0; i < 10; i++) setTimeout(spawnLeaf, i * 180);
-    setInterval(spawnLeaf, 650);
+    for (let i = 0; i < 8; i++) setTimeout(spawnLeaf, i * 200);
+    setInterval(spawnLeaf, 750);
   }
+
 });

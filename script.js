@@ -3,6 +3,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const MEMBERS_NUMBER = "(646) 444-4277";
   const MENU_JSON_PATH = "menu.json";
 
+  // 🔊 Unlock audio (place file here: /media/High.mp3)
+  const UNLOCK_AUDIO_SRC = "media/High.mp3";
+  let unlockAudio = null;
+  let unlockAudioPlayed = false;
+
   // Public / vibe
   const logoTrigger = document.getElementById("logoTrigger");
   const membersSection = document.getElementById("members");
@@ -81,7 +86,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function startHold(e) {
-    e.preventDefault();
+    // prevent mobile zoom/selection issues
+    if (e?.cancelable) e.preventDefault();
     if (holding) return;
     holding = true;
     holdTimer = setTimeout(revealMembers, 1200);
@@ -119,6 +125,29 @@ document.addEventListener("DOMContentLoaded", () => {
     if (menuStatus) menuStatus.textContent = "";
   }
 
+  function playUnlockAudioOnce() {
+    if (unlockAudioPlayed) return;
+
+    try {
+      if (!unlockAudio) unlockAudio = new Audio(UNLOCK_AUDIO_SRC);
+
+      // optional tuning
+      unlockAudio.volume = 0.6;
+      unlockAudio.currentTime = 0;
+
+      const p = unlockAudio.play();
+      // handle browsers that return a Promise
+      if (p && typeof p.then === "function") {
+        p.then(() => { unlockAudioPlayed = true; })
+         .catch(() => { /* ignore */ });
+      } else {
+        unlockAudioPlayed = true;
+      }
+    } catch {
+      // ignore audio failures silently
+    }
+  }
+
   function setUnlockedUI() {
     isUnlocked = true;
 
@@ -137,7 +166,10 @@ document.addEventListener("DOMContentLoaded", () => {
     showToast("Access granted.");
     setPressure("CLEARED");
 
-    // IMPORTANT: menu loads ONLY after unlock
+    // 🔊 Play song on successful unlock
+    playUnlockAudioOnce();
+
+    // Load menu AFTER unlock
     loadMenu();
   }
 
@@ -243,7 +275,7 @@ document.addEventListener("DOMContentLoaded", () => {
           menuGrid.appendChild(card);
         }
       }
-    } catch (e) {
+    } catch {
       menuStatus.textContent = "Menu failed to load. Check menu.json format + commit.";
     }
   }
@@ -326,11 +358,11 @@ document.addEventListener("DOMContentLoaded", () => {
       leaf.className = "neon-leaf";
       leaf.innerHTML = leafSVG;
 
-      const size = 10 + Math.random() * 12; // slightly smaller
+      const size = 10 + Math.random() * 12; // smaller to avoid any clipping
       leaf.style.width = size + "px";
       leaf.style.height = size + "px";
 
-      // Spawn safely inside screen edges
+      // spawn away from edges
       leaf.style.left = (Math.random() * 90 + 5) + "vw";
 
       leaf.style.setProperty("--drift", (Math.random() * 140 - 70).toFixed(0) + "px");

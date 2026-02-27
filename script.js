@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // === AUDIO (Members Unlock Theme) ===
   // IMPORTANT: must match your actual filename exactly
-  const UNLOCK_AUDIO_SRC = "media/High.mp3";
+  const UNLOCK_AUDIO_SRC = "media/High%20.mp3";
   let bgm = null;
   let bgmWanted = false; // user wants music on (unlocked)
   let resumeTapArmed = false;

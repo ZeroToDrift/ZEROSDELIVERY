@@ -1,10 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
-  "use strict";
-
   const MEMBER_PASSWORD = "BigJigglyBalls";
   const MEMBERS_NUMBER = "(646) 444-4277";
   const MENU_JSON_PATH = "menu.json";
 
+  // Public / vibe
   const logoTrigger = document.getElementById("logoTrigger");
   const membersSection = document.getElementById("members");
   const toast = document.getElementById("toast");
@@ -12,20 +11,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const cultEl = document.getElementById("cultLine");
   const taglineEl = document.getElementById("taglineText");
 
+  // Gate + members content
   const gate = document.getElementById("gate");
   const memberContent = document.getElementById("memberContent");
   const passInput = document.getElementById("memberPass");
   const unlockBtn = document.getElementById("unlockBtn");
   const gateMsg = document.getElementById("gateMsg");
 
+  // Number + actions
   const numberEl = document.getElementById("burnerNumber");
   const copyBtn = document.getElementById("copyBtn");
   const copyMsg = document.getElementById("copyMsg");
   const smsLink = document.getElementById("smsLink");
 
+  // Menu UI
   const menuGrid = document.getElementById("menuGrid");
   const menuStatus = document.getElementById("menuStatus");
 
+  // Neon leaf layer
   const neonLeafContainer = document.getElementById("leafContainer");
 
   let isUnlocked = false;
@@ -34,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!toast) return;
     toast.textContent = msg;
     toast.classList.remove("hidden");
-    setTimeout(() => toast.classList.add("hidden"), 1400);
+    setTimeout(() => toast.classList.add("hidden"), 1200);
   }
 
   function setPressure(state) {
@@ -74,11 +77,11 @@ document.addEventListener("DOMContentLoaded", () => {
     showToast("Members unlocked.");
     setPressure("ELEVATED");
     setTimeout(() => membersSection.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
-    setTimeout(() => passInput && passInput.focus(), 400);
+    setTimeout(() => passInput?.focus(), 400);
   }
 
   function startHold(e) {
-    if (e.type.startsWith("touch")) e.preventDefault();
+    e.preventDefault();
     if (holding) return;
     holding = true;
     holdTimer = setTimeout(revealMembers, 1200);
@@ -86,8 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function endHold() {
     holding = false;
-    if (holdTimer) clearTimeout(holdTimer);
-    holdTimer = null;
+    clearTimeout(holdTimer);
   }
 
   if (logoTrigger) {
@@ -99,6 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
     logoTrigger.addEventListener("mouseleave", endHold);
   }
 
+  // Locked state
   function setLockedUI() {
     isUnlocked = false;
 
@@ -119,8 +122,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function setUnlockedUI() {
     isUnlocked = true;
 
-    if (gate) gate.classList.add("hidden");
-    if (memberContent) memberContent.classList.remove("hidden");
+    gate?.classList.add("hidden");
+    memberContent?.classList.remove("hidden");
 
     if (numberEl) numberEl.textContent = MEMBERS_NUMBER;
     if (copyBtn) copyBtn.disabled = false;
@@ -149,6 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }[c]));
   }
 
+  // ---------- CATEGORY GROUPING HELPERS ----------
   function normalizeCategory(cat = "") {
     const c = String(cat || "").trim();
     return c || "Other";
@@ -188,7 +192,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const res = await fetch(MENU_JSON_PATH, { cache: "no-store" });
       if (!res.ok) throw new Error("menu.json not found");
       const data = await res.json();
-      if (!Array.isArray(data.items)) throw new Error("menu.json invalid");
+
+      if (!Array.isArray(data.items)) throw new Error("menu.json format invalid");
 
       if (data.items.length === 0) {
         menuStatus.textContent = "Menu is empty. Add items to menu.json.";
@@ -196,6 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       menuStatus.textContent = "";
+
       const grouped = groupByCategory(data.items);
 
       for (const [cat, items] of grouped.entries()) {
@@ -240,11 +246,12 @@ document.addEventListener("DOMContentLoaded", () => {
           menuGrid.appendChild(card);
         }
       }
-    } catch {
-      menuStatus.textContent = "Menu failed to load. Check menu.json + commit.";
+    } catch (e) {
+      menuStatus.textContent = "Menu failed to load. Check menu.json format + commit.";
     }
   }
 
+  // Unlock attempt
   function unlockAttempt() {
     const attempt = (passInput?.value || "").normalize("NFKC").trim();
 
@@ -271,6 +278,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Enter") unlockAttempt();
   });
 
+  // Copy guarded
   copyBtn?.addEventListener("click", async () => {
     if (!isUnlocked) return;
     try {
@@ -290,108 +298,54 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* =========================================================
-     LEAVES — realism + OBVIOUS wind gusts
+     NEON POT LEAF RAIN
+     FIXED: no cut-offs + glow won’t clip
   ========================================================= */
   if (neonLeafContainer) {
     const leafSVG = `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-        <path fill="rgba(60,255,132,0.92)"
-          d="M128 16c10 38 13 70 9 105 27-43 67-75 125-90-28 58-64 97-111 129
-             52-10 99-7 141 11-52 37-99 50-141 47 31 30 53 72 58 142
-             -58-31-93-73-116-118-23 45-58 87-116 118
-             5-70 27-112 58-142-42 3-89-10-141-47
-             42-18 89-21 141-11C67 128 31 89 3 31
-             61 46 101 78 128 121c-4-35-1-67 0-105z"/>
-        <path fill="rgba(0,0,0,0.16)"
-          d="M128 40c8 30 8 58 4 88 22-29 50-49 88-61-21 39-45 64-78 83
-             36-7 68-5 98 8-37 25-69 34-98 33 23 22 39 53 41 97
-             -41-23-66-53-83-87-17 34-42 64-83 87 2-44 18-75 41-97
-             -29 1-61-8-98-33 30-13 62-15 98-8-33-19-57-44-78-83
-             38 12 66 32 88 61-4-30-4-58 4-88z"/>
-      </svg>
-    `;
-
-    let gustUntil = 0;
-    let gustStrength = 0;
-    let nextGustAt = Date.now() + (8000 + Math.random() * 9000);
-
-    function startGust() {
-      const now = Date.now();
-      const dir = Math.random() < 0.5 ? -1 : 1;
-
-      gustStrength = dir * (220 + Math.random() * 260); // 220–480px
-      gustUntil = now + (3500 + Math.random() * 2500);  // 3.5–6s
-      nextGustAt = now + (14000 + Math.random() * 18000); // 14–32s
-
-      if (pressureEl) {
-        const prev = pressureEl.textContent;
-        pressureEl.textContent = "PRESSURE LEVEL: WIND SHIFT";
-        setTimeout(() => {
-          if (pressureEl) pressureEl.textContent = prev || "PRESSURE LEVEL: STABLE";
-        }, 1000);
-      }
-    }
-
-    function maybeStartGust() {
-      const now = Date.now();
-      if (now >= nextGustAt && now >= gustUntil) startGust();
-    }
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 -20 168 168">
+  <path fill="rgba(60,255,132,0.92)"
+    d="M63 10c3 20 4 33 2 48 9-16 24-29 44-36-11 25-23 40-40 54
+       18-3 34-1 52 7-20 14-38 19-54 18 12 11 21 27 23 52
+       -22-12-36-28-44-45-8 17-22 33-44 45
+       2-25 11-41 23-52-16 1-34-4-54-18
+       18-8 34-10 52-7-17-14-29-29-40-54
+       20 7 35 20 44 36-2-15-1-28 2-48z"/>
+  <path fill="rgba(0,0,0,0.18)"
+    d="M64 20c2 14 2 28 0 42 10-12 22-20 36-25
+       -9 15-18 27-31 36 13-2 26-1 39 5
+       -15 9-28 13-40 12 10 9 17 21 18 39
+       -16-9-26-20-32-33-6 13-16 24-32 33
+       1-18 8-30 18-39-12 1-25-3-40-12
+       13-6 26-7 39-5-13-9-22-21-31-36
+       14 5 26 13 36 25-2-14-2-28 0-42z"/>
+</svg>
+`;
 
     function spawnLeaf() {
-      maybeStartGust();
-
       const leaf = document.createElement("div");
       leaf.className = "neon-leaf";
       leaf.innerHTML = leafSVG;
 
-      const depth = Math.random(); // 0 far → 1 near
-
-      const size = 12 + depth * 26;          // 12–38px (bigger = less blocky)
-      const opacity = 0.05 + depth * 0.18;   // 0.05–0.23
-      const blur = (1 - depth) * 1.2;        // 0–1.2px
-      const duration = 11 + (1 - depth) * 18; // 11–29s
-
-      const baseDrift = (Math.random() * 220 - 110);
-      const now = Date.now();
-      const gusting = now < gustUntil;
-
-      const drift = (baseDrift + (gusting ? gustStrength : 0)).toFixed(0) + "px";
-      const rot0 = (Math.random() * 360).toFixed(0) + "deg";
-      const rot1 = (
-        Math.random() * 720 - 360 +
-        (gusting ? (Math.random() * 520 - 260) : 0)
-      ).toFixed(0) + "deg";
-
+      const size = 12 + Math.random() * 14; // 12–26px
       leaf.style.width = size + "px";
       leaf.style.height = size + "px";
-      leaf.style.left = (Math.random() * 100) + "vw";
 
-      leaf.style.setProperty("--drift", drift);
-      leaf.style.setProperty("--rot0", rot0);
-      leaf.style.setProperty("--rot1", rot1);
+      // FIX: don’t spawn right on edges
+      leaf.style.left = (Math.random() * 90 + 5) + "vw";
 
-      leaf.style.animationDuration = duration + "s";
-      leaf.style.opacity = opacity.toFixed(2);
+      leaf.style.setProperty("--drift", (Math.random() * 160 - 80).toFixed(0) + "px");
+      leaf.style.setProperty("--rot0", (Math.random() * 360).toFixed(0) + "deg");
+      leaf.style.setProperty("--rot1", (Math.random() * 720 - 360).toFixed(0) + "deg");
 
-      // slight hue variance: some greener, some slightly teal
-      const hueShift = -8 + Math.random() * 14; // -8..+6
-      const glowA = (0.12 + depth * 0.24).toFixed(2);
-      const glowB = (0.06 + depth * 0.10).toFixed(2);
-
-      leaf.style.filter =
-        `hue-rotate(${hueShift.toFixed(0)}deg) ` +
-        `drop-shadow(0 0 ${2 + depth * 5}px rgba(60,255,132,${glowA})) ` +
-        `drop-shadow(0 0 ${6 + depth * 12}px rgba(60,255,132,${glowB})) ` +
-        `blur(${blur.toFixed(2)}px)`;
+      leaf.style.animationDuration = (10 + Math.random() * 16) + "s";
+      leaf.style.opacity = (0.10 + Math.random() * 0.18).toFixed(2);
 
       neonLeafContainer.appendChild(leaf);
-      setTimeout(() => leaf.remove(), Math.ceil(duration * 1000) + 5000);
+      setTimeout(() => leaf.remove(), 28000);
     }
 
-    // initial burst
-    for (let i = 0; i < 14; i++) setTimeout(spawnLeaf, i * 140);
-
-    // steady rain
-    setInterval(spawnLeaf, 600);
+    for (let i = 0; i < 10; i++) setTimeout(spawnLeaf, i * 180);
+    setInterval(spawnLeaf, 650);
   }
 });

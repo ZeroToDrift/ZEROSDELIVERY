@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const menuGrid = document.getElementById("menuGrid");
   const menuStatus = document.getElementById("menuStatus");
 
-  // Neon leaf layer (this is the REAL one now)
+  // Neon leaf layer
   const neonLeafContainer = document.getElementById("leafContainer");
 
   let isUnlocked = false;
@@ -122,11 +122,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function setUnlockedUI() {
     isUnlocked = true;
 
-    // Hide gate / show content
     gate?.classList.add("hidden");
     memberContent?.classList.remove("hidden");
 
-    // Reveal number + enable actions
     if (numberEl) numberEl.textContent = MEMBERS_NUMBER;
     if (copyBtn) copyBtn.disabled = false;
 
@@ -139,13 +137,11 @@ document.addEventListener("DOMContentLoaded", () => {
     showToast("Access granted.");
     setPressure("CLEARED");
 
-    // Load menu AFTER unlock
     loadMenu();
   }
 
   setLockedUI();
 
-  // Video detection (supports .MOV too)
   function isVideo(path = "") {
     return /\.(mp4|webm|ogg|mov)$/i.test(path);
   }
@@ -154,6 +150,36 @@ document.addEventListener("DOMContentLoaded", () => {
     return String(s).replace(/[&<>"']/g, (c) => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
     }[c]));
+  }
+
+  // ---------- CATEGORY GROUPING HELPERS ----------
+  function normalizeCategory(cat = "") {
+    const c = String(cat || "").trim();
+    return c || "Other";
+  }
+
+  function categoryTitle(cat) {
+    return normalizeCategory(cat).toUpperCase();
+  }
+
+  function groupByCategory(items) {
+    const map = new Map();
+    for (const it of items) {
+      const cat = normalizeCategory(it.category);
+      if (!map.has(cat)) map.set(cat, []);
+      map.get(cat).push(it);
+    }
+    return map;
+  }
+
+  function renderCategoryHeader(cat) {
+    const header = document.createElement("div");
+    header.className = "menu-section";
+    header.innerHTML = `
+      <div class="menu-section-title">${escapeHtml(categoryTitle(cat))}</div>
+      <div class="menu-section-line"></div>
+    `;
+    return header;
   }
 
   async function loadMenu() {
@@ -176,44 +202,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
       menuStatus.textContent = "";
 
-      for (const item of data.items) {
-        const cat = escapeHtml(item.category || "");
-        const name = escapeHtml(item.name || "");
-        const price = escapeHtml(item.price || "");
-        const desc = escapeHtml(item.desc || item.description || "");
-        const media = (item.media || "").trim();
+      // Group items
+      const grouped = groupByCategory(data.items);
 
-        const card = document.createElement("div");
-        card.className = "menu-item";
+      // Render in insertion order (the order categories appear in JSON)
+      for (const [cat, items] of grouped.entries()) {
+        menuGrid.appendChild(renderCategoryHeader(cat));
 
-        let mediaHtml = "";
-        if (media) {
-          if (isVideo(media)) {
-            mediaHtml = `
-              <div class="menu-media">
-                <video controls playsinline preload="metadata" src="${escapeHtml(media)}"></video>
-              </div>`;
-          } else {
-            mediaHtml = `
-              <div class="menu-media">
-                <img loading="lazy" src="${escapeHtml(media)}" alt="${name}">
-              </div>`;
+        for (const item of items) {
+          const name = escapeHtml(item.name || "");
+          const price = escapeHtml(item.price || "");
+          const desc = escapeHtml(item.desc || item.description || "");
+          const media = (item.media || "").trim();
+
+          const card = document.createElement("div");
+          card.className = "menu-item";
+
+          let mediaHtml = "";
+          if (media) {
+            if (isVideo(media)) {
+              mediaHtml = `
+                <div class="menu-media">
+                  <video controls playsinline preload="metadata" src="${escapeHtml(media)}"></video>
+                </div>`;
+            } else {
+              mediaHtml = `
+                <div class="menu-media">
+                  <img loading="lazy" src="${escapeHtml(media)}" alt="${name}">
+                </div>`;
+            }
           }
-        }
 
-        card.innerHTML = `
-          <div class="menu-top">
-            <div>
-              <div class="menu-name">${name}</div>
-              <div class="menu-cat">${cat}</div>
+          card.innerHTML = `
+            <div class="menu-top">
+              <div>
+                <div class="menu-name">${name}</div>
+                <div class="menu-cat">${escapeHtml(cat)}</div>
+              </div>
+              <div class="menu-price">${price}</div>
             </div>
-            <div class="menu-price">${price}</div>
-          </div>
-          ${desc ? `<div class="menu-desc">${desc}</div>` : ""}
-          ${mediaHtml}
-        `;
+            ${desc ? `<div class="menu-desc">${desc}</div>` : ""}
+            ${mediaHtml}
+          `;
 
-        menuGrid.appendChild(card);
+          menuGrid.appendChild(card);
+        }
       }
     } catch (e) {
       menuStatus.textContent = "Menu failed to load. Check menu.json format + commit.";
@@ -298,10 +331,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => leaf.remove(), 28000);
     }
 
-    // Spawn a burst immediately so you SEE it
     for (let i = 0; i < 10; i++) setTimeout(spawnLeaf, i * 180);
-
-    // Then keep raining
     setInterval(spawnLeaf, 650);
   }
 });

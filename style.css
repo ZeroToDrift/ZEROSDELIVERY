@@ -44,42 +44,6 @@ body{
   filter:brightness(1.15) saturate(1.2);
 }
 
-/* ===== Leaf rain (cinematic legacy - safe to keep) ===== */
-.leaf-rain{
-  pointer-events:none;
-  position:absolute;
-  inset:0;
-  overflow:hidden;
-  z-index:1;
-  opacity:0.95;
-}
-
-/* legacy class .leaf used by older script versions (kept, but won't be used by new neon system) */
-.leaf{
-  position:absolute;
-  top:-35vh;
-  width:14px;
-  height:14px;
-  opacity:0.10;
-  will-change: transform;
-  animation: fall linear infinite;
-  filter:
-    drop-shadow(0 0 10px rgba(60,255,132,0.08))
-    blur(var(--blur, 0px));
-}
-
-@keyframes fall{
-  0%{ transform: translate3d(0,-35vh,0) rotate(var(--rot0, 0deg)); }
-  100%{ transform: translate3d(var(--drift, 40px),120vh,0) rotate(var(--rot1, 360deg)); }
-}
-
-.leaf-svg{
-  width:100%;
-  height:100%;
-  display:block;
-  color: var(--neon);
-}
-
 /* ===== Content wrapper ===== */
 .container{
   position:relative;
@@ -419,12 +383,6 @@ body{
 }
 
 .after-dark .pressure{ color: rgba(255,60,111,0.92); }
-.after-dark .leaf-svg{ color: var(--after); }
-
-.after-dark .leaf{
-  opacity:0.08;
-  filter: drop-shadow(0 0 12px rgba(255,60,111,0.12)) blur(var(--blur, 0px));
-}
 
 .after-dark .card{
   border-color: rgba(255,60,111,0.18);
@@ -448,58 +406,7 @@ body{
   .menu-price{ max-width: 55%; }
 }
 
-/* =========================================================
-   NEON POT LEAF RAIN (ACTIVE SYSTEM)
-   - uses #leafContainer + .neon-leaf (no conflicts)
-   - layer sits above background, below content
-========================================================= */
-
-#leafContainer{
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: 1;
-}
-
-.neon-leaf{
-  position:absolute;
-  top:-12vh;
-
-  width:18px;
-  height:18px;
-
-  opacity:0.18;
-  will-change: transform;
-  animation: neonFall linear infinite;
-
-  filter:
-    drop-shadow(0 0 6px rgba(60,255,132,0.55))
-    drop-shadow(0 0 16px rgba(60,255,132,0.25));
-}
-
-@keyframes neonFall{
-  0%   { transform: translate3d(0,-12vh,0) rotate(var(--rot0, 0deg)); }
-  100% { transform: translate3d(var(--drift, 0px),110vh,0) rotate(var(--rot1, 360deg)); }
-}
-
-.neon-leaf svg{
-  width:100%;
-  height:100%;
-  display:block;
-}
-
-/* After Dark leaf tint */
-.after-dark .neon-leaf{
-  opacity:0.14;
-  filter:
-    drop-shadow(0 0 7px rgba(255,60,111,0.45))
-    drop-shadow(0 0 16px rgba(255,60,111,0.22));
-}
-
-.after-dark .neon-leaf path{
-  fill: rgba(255,60,111,0.95);
-}
+/* ===== Category headers ===== */
 .menu-section{
   margin-top: 18px;
 }
@@ -516,4 +423,61 @@ body{
   margin-top: 10px;
   background: linear-gradient(90deg, rgba(60,255,132,0.65), rgba(255,255,255,0.06));
   border-radius: 999px;
+}
+
+/* =========================================================
+   NEON POT LEAF RAIN (SINGLE ACTIVE SYSTEM)
+   - uses #leafContainer + .neon-leaf
+   - float/sway animation for realism
+========================================================= */
+
+#leafContainer{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1; /* above bg, below content */
+}
+
+.neon-leaf{
+  position:absolute;
+  top:-12vh;
+
+  width:18px;
+  height:18px;
+
+  opacity:0.12;
+  will-change: transform, filter, opacity;
+  transform-origin: center;
+
+  animation: neonFall linear infinite;
+
+  filter:
+    drop-shadow(0 0 4px rgba(60,255,132,0.35))
+    drop-shadow(0 0 10px rgba(60,255,132,0.18));
+}
+
+/* sway/float fall */
+@keyframes neonFall{
+  0%   { transform: translate3d(0,-12vh,0) rotate(var(--rot0, 0deg)); }
+  50%  { transform: translate3d(calc(var(--drift, 0px) * 0.55),50vh,0) rotate(calc(var(--rot1, 360deg) * 0.55)); }
+  100% { transform: translate3d(var(--drift, 0px),110vh,0) rotate(var(--rot1, 360deg)); }
+}
+
+.neon-leaf svg{
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+/* After Dark leaf tint */
+.after-dark .neon-leaf{
+  opacity:0.10;
+  filter:
+    drop-shadow(0 0 5px rgba(255,60,111,0.28))
+    drop-shadow(0 0 12px rgba(255,60,111,0.16));
+}
+
+.after-dark .neon-leaf path{
+  fill: rgba(255,60,111,0.92);
 }

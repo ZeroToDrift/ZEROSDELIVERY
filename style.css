@@ -47,7 +47,7 @@ body{
 /* ===== Content wrapper ===== */
 .container{
   position:relative;
-  z-index:2; /* ALWAYS above leaves */
+  z-index:2; /* content always above leaves */
   width:100%;
   max-width:540px;
 }
@@ -407,17 +407,13 @@ body{
 }
 
 /* ===== Category headers ===== */
-.menu-section{
-  margin-top: 18px;
-}
-
+.menu-section{ margin-top: 18px; }
 .menu-section-title{
   font-weight: 1000;
   letter-spacing: 3px;
   font-size: 12px;
   opacity: 0.9;
 }
-
 .menu-section-line{
   height: 1px;
   margin-top: 10px;
@@ -427,40 +423,37 @@ body{
 
 /* =========================================================
    NEON POT LEAF RAIN (SINGLE ACTIVE SYSTEM)
-   - uses #leafContainer + .neon-leaf
-   - float/sway animation for realism
 ========================================================= */
-
 #leafContainer{
   position: fixed;
   inset: 0;
   pointer-events: none;
   overflow: hidden;
-  z-index: 1; /* above bg, below content */
+  z-index: 1;
 }
 
 .neon-leaf{
   position:absolute;
   top:-12vh;
-
   width:18px;
   height:18px;
 
   opacity:0.12;
   will-change: transform, filter, opacity;
-  transform-origin: center;
+  transform-origin:center;
 
   animation: neonFall linear infinite;
 
+  /* anti-blocky edges */
   filter:
-    drop-shadow(0 0 4px rgba(60,255,132,0.35))
-    drop-shadow(0 0 10px rgba(60,255,132,0.18));
+    drop-shadow(0 0 4px rgba(60,255,132,0.30))
+    drop-shadow(0 0 10px rgba(60,255,132,0.16))
+    blur(0.2px);
 }
 
-/* sway/float fall */
 @keyframes neonFall{
   0%   { transform: translate3d(0,-12vh,0) rotate(var(--rot0, 0deg)); }
-  50%  { transform: translate3d(calc(var(--drift, 0px) * 0.55),50vh,0) rotate(calc(var(--rot1, 360deg) * 0.55)); }
+  50%  { transform: translate3d(calc(var(--drift, 0px) * 0.75),50vh,0) rotate(calc(var(--rot1, 360deg) * 0.55)); }
   100% { transform: translate3d(var(--drift, 0px),110vh,0) rotate(var(--rot1, 360deg)); }
 }
 
@@ -474,8 +467,9 @@ body{
 .after-dark .neon-leaf{
   opacity:0.10;
   filter:
-    drop-shadow(0 0 5px rgba(255,60,111,0.28))
-    drop-shadow(0 0 12px rgba(255,60,111,0.16));
+    drop-shadow(0 0 5px rgba(255,60,111,0.26))
+    drop-shadow(0 0 12px rgba(255,60,111,0.14))
+    blur(0.2px);
 }
 
 .after-dark .neon-leaf path{

@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const MENU_JSON_PATH = "menu.json";
 
   // 🔊 Unlock audio (place file here: /media/High.mp3)
-  const UNLOCK_AUDIO_SRC = "media/High.mp3";
+  const UNLOCK_AUDIO_SRC = "media/High%20.mp3";
   let unlockAudio = null;
   let unlockAudioPlayed = false;
 
